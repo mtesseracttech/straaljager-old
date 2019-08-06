@@ -1,59 +1,80 @@
-use straal::{Vec3, FloatType};
-use std::path::Path;
-use std::io::{BufReader, Write};
-use std::fs::File;
-use std::fs;
-use std::time::SystemTime;
 use std::error::Error;
-use rand::{self, Rng};
+use std::fs;
+use std::fs::File;
+use std::io::{BufReader, Write};
+use std::path::Path;
+use straal::{Vec3, Vec3n};
 
-pub struct Ray<T>{
-    pub o : Vec3<T>,
-    pub d : Vec3<T>
-}
+pub mod camera;
+pub mod hittable;
+pub mod ppm_file;
+pub mod ray;
+pub mod sphere;
+pub mod vector_utils;
 
-impl<T> Ray<T> where T : FloatType<T>{
-    fn get_origin(&self) -> Vec3<T> {
+use camera::*;
+use hittable::*;
+use ppm_file::*;
+use rand::Rng;
+use ray::*;
+use sphere::*;
+use vector_utils::*;
 
+pub fn get_ray_color(r: &RayN, scene: &HittableScene<f32>) -> Vec3n {
+    let mut rec = HitRecord::<f32>::default();
+    if scene.hit(r, 0.0, std::f32::MAX, &mut rec) {
+        (rec.n + Vec3n::one()) * 0.5
+    } else {
+        let unit_direction = r.get_direction().normalized();
+        let t = 0.5 * (unit_direction.y + 1.0);
+        Vec3::one() * (1.0 - t) + Vec3n::new(0.5, 0.7, 1.0) * t
     }
 }
 
 fn main() {
-    let n_x = 200;
-    let n_y = 100;
-    let mut output = String::with_capacity(20 + n_x * n_y * 12); //Assumed max size of output file
-    let header = format!("P3\n{} {}\n255\n", n_x, n_y);
-    output.push_str(&header);
-    for j in (0..n_y).rev() {
-        for i in 0..n_x {
-            let col = Vec3{
-                x: i as f32 / n_x as f32,
-                y: j as f32 / n_y as f32,
-                z: 0.2
-            };
-            let i_r = (255.99 * col[0]) as i32;
-            let i_g = (255.99 * col[1]) as i32;
-            let i_b = (255.99 * col[2]) as i32;
-            let line = format!("{} {} {}\n", i_r, i_g, i_b);
-            output.push_str(&line);
+    let mut scene = HittableScene::<f32>::new();
+    scene.add_hittable(Box::new(Sphere {
+        center: Vec3n::new(0, 0, -1),
+        radius: 0.5,
+    }));
+    scene.add_hittable(Box::new(Sphere {
+        center: Vec3n::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    }));
+
+    //    scene.add_hittable(Box::new(Sphere {
+    //        center: Vec3n::new(-0.5, 0.0, -1.0),
+    //        radius: 0.5,
+    //    }));
+    //    scene.add_hittable(Box::new(Sphere {
+    //        center: Vec3n::new(0.5, 0.0, -1.0),
+    //        radius: 0.5,
+    //    }));
+
+    let mut rng = rand::thread_rng();
+
+    let samples = 100;
+
+    let image_width = 400;
+    let camera = Camera::<f32>::new(4.0, 4.0, 1.0, Vec3n::new(0, 0, 0));
+    let image_height = (image_width as f32 * camera.aspect_ratio) as usize;
+
+    let mut pixels = Vec::with_capacity(image_width * image_height);
+
+    for j in (0..image_height).rev() {
+        for i in 0..image_width {
+            let mut color = Vec3n::zero();
+            for sample in 0..samples {
+                let u = (i as f32 + rng.gen_range(0.0, 1.0)) / image_width as f32;
+                let v = (j as f32 + rng.gen_range(0.0, 1.0)) / image_height as f32;
+                let r = camera.get_ray(u, v);
+                let p = r.point_at_parameter(2.0);
+                color += get_ray_color(&r, &scene);
+            }
+            color /= samples as f32;
+
+            pixels.push(color);
         }
     }
-    write_ppm_file(&output);
+    write_ppm_file(&pixels, image_width, image_height, None);
 }
-
-fn write_ppm_file(output : &str){
-    let unique_id : u32 = rand::thread_rng().gen_range(0, 999999);
-    let file_name = format!("output_{:0>6}.ppm", unique_id);
-    let file_path = "./output/";
-    match File::create(file_path.to_owned() + &file_name) {
-        Ok(mut file) => {
-            match file.write_all(&output.as_bytes()){
-                Ok(s) => { println!("Succeeded in writing file"); },
-                Err(e) => {println!("{}", e);},
-            }
-        },
-        Err(e) => { panic!("Could not create file: /n{}", e.description() )
-        },
-    }
-}
-
