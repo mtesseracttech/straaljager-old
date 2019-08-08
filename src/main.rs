@@ -10,16 +10,20 @@ use crate::math::*;
 use rand::Rng;
 use rayon::prelude::*;
 use std::sync::Arc;
+use std::time::Instant;
 use straal::*;
 
 fn main() {
+    //Timer
+    let start_time = Instant::now();
+
     //Setting up the scene and camera
     let offset = Vec3h::all(100); //This mostly exists to see if certain issues are caused by being near 0,0,0
     let camera = Camera::<f64>::new(4.0, 2.0, 1.0, Vec3h::new(0.0, 0.0, 0.0) + offset);
     let scene = Arc::new(set_up_scene(offset));
 
     //Setting up the output image settings
-    let samples = 100;
+    let samples = 2;
     let image_width = 1000;
     let image_height = (image_width as f64 * camera.aspect_ratio) as usize;
 
@@ -77,6 +81,12 @@ fn main() {
     //        })
     //        .collect_into_vec(&mut pixels);
     //
+
+    let end_time = start_time.elapsed();
+    println!(
+        "Time taken for ray tracing: {:.4}s",
+        end_time.as_secs() as f64 + end_time.subsec_nanos() as f64 / 1.0e+9,
+    );
     write_ppm_file(&pixels, image_width, image_height, None);
 }
 
