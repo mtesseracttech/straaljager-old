@@ -1,32 +1,46 @@
-use num::NumCast;
 use rand::{self, Rng};
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
-use straal::{FloatType, IVec3, Vec3, Vec3n};
+use straal::{FloatType, IVec3, Vec3};
 
 pub fn to_ppm_color<T>(v: &Vec3<T>) -> IVec3<i32>
 where
     T: FloatType<T>,
 {
     let max = T::from(255.99).unwrap();
+    let x = num::cast(max * v.x);
+    let y = num::cast(max * v.y);
+    let z = num::cast(max * v.z);
+    if x.is_none() || y.is_none() || z.is_none() {
+        println!("Something is wrong here: {},{},{}", v.x, v.y, v.z);
+    }
     IVec3 {
-        x: num::cast(max * v.x).unwrap(),
-        y: num::cast(max * v.y).unwrap(),
-        z: num::cast(max * v.z).unwrap(),
+        x: x.unwrap(),
+        y: y.unwrap(),
+        z: z.unwrap(),
     }
 }
 
-pub fn write_ppm_file(pixels: &Vec<Vec3n>, width: usize, height: usize, file_name: Option<&str>) {
+pub fn write_ppm_file<T>(
+    pixels: &Vec<Vec3<T>>,
+    width: usize,
+    height: usize,
+    file_name: Option<&str>,
+) where
+    T: FloatType<T>,
+{
     let real_file_name = match file_name {
         None => {
             let unique_id: u32 = rand::thread_rng().gen_range(0, 999999);
             format!("output_{:0>6}.ppm", unique_id)
         }
-        Some(n) => n.to_string(),
+        Some(n) => n.to_string() + ".ppm",
     };
 
     let file_path = "./output/";
+
+    println!("Writing pixels to: {}{}", file_path, real_file_name);
 
     let mut output = String::with_capacity(20 + pixels.len() * 12); //Assumed max size of output file
     output.push_str(&format!("P3\n{} {}\n255\n", width, height)); //Header

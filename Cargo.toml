@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 straal = { git = "https://github.com/mtesseracttech/straal", branch = "develop" }
-rand = "0.7.0"
-num = "0.2.0"
+rand = "*"
+num = "*"
+rayon = "*"

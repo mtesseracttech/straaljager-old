@@ -1,11 +1,14 @@
 use super::ray::Ray;
 use crate::hittable::{HitRecord, Hittable};
+use crate::material::Material;
 use std::fmt::Debug;
+use std::sync::Arc;
 use straal::{FloatType, Vec3};
 
 pub struct Sphere<T> {
     pub center: Vec3<T>,
     pub radius: T,
+    pub material: Arc<dyn Material<T>>,
 }
 
 impl<T> Sphere<T>
@@ -24,12 +27,13 @@ where
         record.t = solution;
         record.p = r.point_at_parameter(solution);
         record.n = (record.p - self.center) / self.radius;
+        record.material = Arc::downgrade(&self.material);
     }
 }
 
 impl<T> Hittable<T> for Sphere<T>
 where
-    T: FloatType<T> + Debug,
+    T: FloatType<T> + Debug + Send + Sync,
 {
     fn hit(&self, r: &Ray<T>, t_min: T, t_max: T, record: &mut HitRecord<T>) -> bool {
         let oc = r.get_origin() - self.center;
