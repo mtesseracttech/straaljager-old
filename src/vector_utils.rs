@@ -1,5 +1,4 @@
 use rand::Rng;
-use std::iter::Sum;
 use straal::{FloatType, Vec3};
 
 pub fn gamma_color<T>(v: &Vec3<T>) -> Vec3<T>
@@ -31,17 +30,3 @@ where
     }
     p
 }
-
-//pub fn random_in_unit_sphere<T>() -> Vec3<T>
-//where
-//    T: FloatType<T>,
-//{
-//    let mut rng = rand::thread_rng();
-//    Vec3::<T> {
-//        x: T::from(rng.gen_range(-1.0, 1.0)).unwrap(),
-//        y: T::from(rng.gen_range(-1.0, 1.0)).unwrap(),
-//        z: T::from(rng.gen_range(-1.0, 1.0)).unwrap(),
-//    }
-//    .normalized()
-//        * T::from(rng.gen_range(0.0, 1.0)).unwrap()
-//}

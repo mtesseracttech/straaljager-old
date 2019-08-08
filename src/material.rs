@@ -141,9 +141,9 @@ where
         attenuation.y = T::one();
         attenuation.z = T::one();
 
-        let mut outward_normal;
-        let mut ni_over_nt;
-        let mut cosine;
+        let outward_normal;
+        let ni_over_nt;
+        let cosine;
         if r.direction.dot(record.n) > T::zero() {
             outward_normal = -record.n;
             ni_over_nt = self.refractive_index;
