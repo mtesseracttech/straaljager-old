@@ -3,14 +3,14 @@ pub mod io;
 pub mod material;
 pub mod math;
 
-use crate::geometry::{HitRecord, Hittable, HittableScene, Sphere};
-use crate::io::write_ppm_file;
-use crate::material::{DielectricMaterial, LambertianMaterial, MetalMaterial};
-use crate::math::{gamma_color, Camera, Ray};
+use crate::geometry::*;
+use crate::io::*;
+use crate::material::*;
+use crate::math::*;
 use rand::Rng;
 use rayon::prelude::*;
 use std::sync::Arc;
-use straal::Vec3h;
+use straal::*;
 
 fn main() {
     //Setting up the scene and camera
@@ -19,37 +19,64 @@ fn main() {
     let scene = Arc::new(set_up_scene(offset));
 
     //Setting up the output image settings
-    let samples = 10;
+    let samples = 100;
     let image_width = 1000;
     let image_height = (image_width as f64 * camera.aspect_ratio) as usize;
 
     //Creating a carthesian product of the coordinates
-    let coords: Vec<(usize, usize)> = (0..image_height)
-        .rev()
-        .map(move |j| (0..image_width).map(move |i| (i, j)))
-        .flatten()
-        .collect();
+    //let rows: Vec<usize> = (0..image_height).rev().collect();
+    //        .map(move |j| (0..image_width).map(move |i| (i, j)))
+    //        .flatten()
+    //        .collect();
+
+    let row_coords: Vec<usize> = (0..image_height).rev().collect();
+
+    let mut rows: Vec<Vec<Vec3h>> = Vec::with_capacity(image_height);
+    row_coords
+        .par_iter()
+        .map(|j| {
+            let mut rng = rand::thread_rng();
+            let row: Vec<Vec3h> = (0..image_width)
+                .map(|i| {
+                    let average: Vec3h = (0..samples)
+                        .map(|_s| {
+                            let u = (i as f64 + rng.gen_range(0.0, 1.0)) / image_width as f64;
+                            let v = (*j as f64 + rng.gen_range(0.0, 1.0)) / image_height as f64;
+                            get_ray_color(&camera.get_ray(u, v), &scene, 0)
+                        })
+                        .sum();
+                    let res = average / samples as f64;
+                    gamma_color(&res)
+                })
+                .collect();
+            row
+        })
+        .collect_into_vec(&mut rows);
 
     //Frame buffer
     let mut pixels = Vec::with_capacity(image_width * image_height);
 
-    //Parallel iteration over the coordinates, filling the frame buffer
-    coords
-        .par_iter()
-        .map(|(i, j)| {
-            let mut rng = rand::thread_rng();
-            let average: Vec3h = (0..samples)
-                .map(|_s| {
-                    let u = (*i as f64 + rng.gen_range(0.0, 1.0)) / image_width as f64;
-                    let v = (*j as f64 + rng.gen_range(0.0, 1.0)) / image_height as f64;
-                    get_ray_color(&camera.get_ray(u, v), &scene, 0)
-                })
-                .sum();
-            let res = average / samples as f64;
-            gamma_color(&res)
-        })
-        .collect_into_vec(&mut pixels);
+    for mut row in rows {
+        pixels.append(&mut row);
+    }
 
+    //Parallel iteration over the coordinates, filling the frame buffer
+    //    coords
+    //        .par_iter()
+    //        .map(|(i, j)| {
+    //            let mut rng = rand::thread_rng();
+    //            let average: Vec3h = (0..samples)
+    //                .map(|_s| {
+    //                    let u = (*i as f64 + rng.gen_range(0.0, 1.0)) / image_width as f64;
+    //                    let v = (*j as f64 + rng.gen_range(0.0, 1.0)) / image_height as f64;
+    //                    get_ray_color(&camera.get_ray(u, v), &scene, 0)
+    //                })
+    //                .sum();
+    //            let res = average / samples as f64;
+    //            gamma_color(&res)
+    //        })
+    //        .collect_into_vec(&mut pixels);
+    //
     write_ppm_file(&pixels, image_width, image_height, None);
 }
 
