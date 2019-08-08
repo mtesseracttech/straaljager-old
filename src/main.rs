@@ -1,23 +1,16 @@
-pub mod camera;
-pub mod hittable;
+pub mod geometry;
+pub mod io;
 pub mod material;
-pub mod ppm_file;
-pub mod ray;
-pub mod sphere;
-pub mod vector_utils;
+pub mod math;
 
+use crate::geometry::{HitRecord, Hittable, HittableScene, Sphere};
+use crate::io::write_ppm_file;
+use crate::material::{DielectricMaterial, LambertianMaterial, MetalMaterial};
+use crate::math::{gamma_color, Camera, Ray};
 use rand::Rng;
-use straal::{Vec3, Vec3h};
-
-use camera::*;
-use hittable::*;
-use material::*;
-use ppm_file::*;
-use ray::*;
 use rayon::prelude::*;
-use sphere::*;
 use std::sync::Arc;
-use vector_utils::*;
+use straal::Vec3h;
 
 fn main() {
     //Setting up the scene and camera

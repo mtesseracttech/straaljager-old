@@ -1,4 +1,4 @@
-use crate::ray::Ray;
+use crate::math::Ray;
 use straal::{FloatType, Vec3};
 
 pub struct Camera<T> {

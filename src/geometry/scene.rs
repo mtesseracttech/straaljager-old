@@ -1,39 +1,7 @@
-use straal::{FloatType, Vec3};
-
-use super::ray::Ray;
-use crate::material::{DummyMaterial, Material};
-use std::fmt::Debug;
+use crate::geometry::{HitRecord, Hittable};
+use crate::math::Ray;
 use std::sync::Arc;
-use std::sync::Weak;
-
-#[derive(Clone)]
-pub struct HitRecord<T> {
-    pub t: T,
-    pub p: Vec3<T>,
-    pub n: Vec3<T>,
-    pub material: Weak<dyn Material<T>>,
-}
-
-impl<T> HitRecord<T>
-where
-    T: FloatType<T> + Send + Sync,
-{
-    pub fn default() -> HitRecord<T> {
-        HitRecord {
-            t: T::from(0).unwrap(),
-            p: Vec3::zero(),
-            n: Vec3::zero(),
-            material: Weak::<DummyMaterial>::new(),
-        }
-    }
-}
-
-pub trait Hittable<T>: Send + Sync
-where
-    T: FloatType<T> + Send + Sync,
-{
-    fn hit(&self, r: &Ray<T>, t_min: T, t_max: T, record: &mut HitRecord<T>) -> bool;
-}
+use straal::FloatType;
 
 pub struct HittableScene<T> {
     pub hittable_list: Vec<Arc<dyn Hittable<T>>>,
@@ -56,7 +24,7 @@ where
 
 impl<T> Hittable<T> for HittableScene<T>
 where
-    T: FloatType<T> + Debug + Send + Sync,
+    T: FloatType<T> + Send + Sync,
 {
     fn hit(&self, r: &Ray<T>, t_min: T, t_max: T, record: &mut HitRecord<T>) -> bool {
         let mut temp_rec = HitRecord::<T>::default();

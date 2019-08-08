@@ -1,6 +1,6 @@
-use super::ray::Ray;
-use crate::hittable::{HitRecord, Hittable};
+use crate::geometry::{HitRecord, Hittable};
 use crate::material::Material;
+use crate::math::Ray;
 use std::fmt::Debug;
 use std::sync::Arc;
 use straal::{FloatType, Vec3};
