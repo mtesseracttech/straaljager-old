@@ -97,14 +97,14 @@ fn set_up_scene(offset: Vec3<Precision>) -> HittableScene<Precision> {
         radius: 0.5,
         material: Arc::new(MetalMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.6, 0.2),
-            roughness: 1.0,
+            roughness: 0.5,
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
         center: Vec3::<Precision>::new(-1.0, 0.0, -1.0) + offset,
         radius: 0.5,
         material: Arc::new(DielectricMaterial {
-            refractive_index: 2.4,
+            refractive_index: 1.5,
         }),
     }));
 

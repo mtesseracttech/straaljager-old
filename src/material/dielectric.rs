@@ -55,6 +55,8 @@ where
                 reflect_prob = schlick(cosine, self.refractive_index);
             }
             None => {
+                scattered.direction = record.p;
+                scattered.direction = reflected;
                 refracted = Vec3::<T>::zero();
                 reflect_prob = T::one();
             }
