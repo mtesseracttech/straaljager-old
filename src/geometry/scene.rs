@@ -34,8 +34,8 @@ where
             if hittable.hit(r, t_min, closest_so_far, &mut temp_rec) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
-                record.p = temp_rec.p;
-                record.n = temp_rec.n;
+                record.position = temp_rec.position;
+                record.normal = temp_rec.normal;
                 record.t = temp_rec.t;
                 record.material = temp_rec.material.clone();
             }

@@ -30,8 +30,8 @@ fn main() {
     let scene = Arc::new(set_up_scene(offset));
 
     //Setting up the output image settings
-    let samples = 100;
-    let image_width = 1000;
+    let samples = 1;
+    let image_width = 40;
     let image_height = (image_width as Precision * camera.aspect_ratio) as usize;
 
     let row_coords: Vec<usize> = (0..image_height).rev().collect();
@@ -79,17 +79,17 @@ fn set_up_scene(offset: Vec3<Precision>) -> HittableScene<Precision> {
     let mut scene = HittableScene::<Precision>::new();
 
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(0, 0, -1) + offset,
-        radius: 0.5,
-        material: Arc::new(LambertianMaterial {
-            albedo: Vec3::<Precision>::new(0.8, 0.3, 0.3),
-        }),
-    }));
-    scene.add_hittable(Arc::new(Sphere {
         center: Vec3::<Precision>::new(0.0, -100.5, -1.0) + offset,
         radius: 100.0,
         material: Arc::new(LambertianMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.8, 0.0),
+        }),
+    }));
+    scene.add_hittable(Arc::new(Sphere {
+        center: Vec3::<Precision>::new(0.0, 0.0, -1.0) + offset,
+        radius: 0.5,
+        material: Arc::new(LambertianMaterial {
+            albedo: Vec3::<Precision>::new(0.8, 0.3, 0.3),
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
@@ -104,7 +104,7 @@ fn set_up_scene(offset: Vec3<Precision>) -> HittableScene<Precision> {
         center: Vec3::<Precision>::new(-1.0, 0.0, -1.0) + offset,
         radius: 0.5,
         material: Arc::new(DielectricMaterial {
-            refractive_index: 1.5,
+            refractive_index: 2.4,
         }),
     }));
 
@@ -118,10 +118,7 @@ pub fn get_ray_color(
 ) -> Vec3<Precision> {
     let mut rec = HitRecord::<Precision>::default();
     if scene.hit(r, 0.0, 10000000.0, &mut rec) {
-        let mut scattered = Ray::<Precision> {
-            origin: Vec3::<Precision>::zero(),
-            direction: Vec3::<Precision>::zero(),
-        };
+        let mut scattered = Ray::<Precision>::default();
         let mut attenuation = Vec3::<Precision>::zero();
         if depth < 50
             && rec
@@ -130,7 +127,7 @@ pub fn get_ray_color(
                 .expect("Could not get RC to material from weak ptr")
                 .scatter(r, &mut rec, &mut attenuation, &mut scattered)
         {
-            attenuation * get_ray_color(&mut scattered, scene, depth + 1)
+            attenuation * get_ray_color(&scattered, scene, depth + 1)
         } else {
             Vec3::<Precision>::zero()
         }

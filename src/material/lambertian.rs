@@ -27,9 +27,9 @@ where
         attenuation: &mut Vec3<T>,
         scattered: &mut Ray<T>,
     ) -> bool {
-        let target = record.p + record.n + random_in_unit_sphere();
-        scattered.origin = record.p;
-        scattered.direction = target - record.p;
+        let target = record.position + record.normal + random_in_unit_sphere();
+        scattered.origin = record.position;
+        scattered.direction = target - record.position;
         attenuation.x = self.albedo.x;
         attenuation.y = self.albedo.y;
         attenuation.z = self.albedo.z;

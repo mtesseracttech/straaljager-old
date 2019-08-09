@@ -28,7 +28,8 @@ where
         attenuation: &mut Vec3<T>,
         scattered: &mut Ray<T>,
     ) -> bool {
-        let reflected = Vec3::<T>::reflect(r.direction, record.n);
+        let reflected = Vec3::<T>::reflect(r.direction, record.normal);
+
         attenuation.x = T::one();
         attenuation.y = T::one();
         attenuation.z = T::one();
@@ -36,15 +37,17 @@ where
         let outward_normal;
         let ni_over_nt;
         let cosine;
-        if Vec3::<T>::dot(r.direction, record.n) > T::zero() {
-            outward_normal = -record.n;
+        if Vec3::<T>::dot(r.direction, record.normal) > T::zero() {
+            outward_normal = -record.normal;
             ni_over_nt = self.refractive_index;
-            cosine = (self.refractive_index * Vec3::<T>::dot(r.direction, record.n))
-                / r.direction.length();
+            let tmp_cos = Vec3::<T>::dot(r.direction, record.normal) / r.direction.length();
+            cosine = (T::one()
+                - self.refractive_index * self.refractive_index * (T::one() - tmp_cos * tmp_cos))
+                .sqrt();
         } else {
-            outward_normal = record.n;
+            outward_normal = record.normal;
             ni_over_nt = T::one() / self.refractive_index;
-            cosine = -Vec3::<T>::dot(r.direction, record.n) / r.direction.length();
+            cosine = -Vec3::<T>::dot(r.direction, record.normal) / r.direction.length();
         }
 
         let refracted;
@@ -55,7 +58,7 @@ where
                 reflect_prob = schlick(cosine, self.refractive_index);
             }
             None => {
-                scattered.direction = record.p;
+                scattered.origin = record.position;
                 scattered.direction = reflected;
                 refracted = Vec3::<T>::zero();
                 reflect_prob = T::one();
@@ -63,10 +66,10 @@ where
         }
 
         if T::from(thread_rng().gen_range(0.0, 1.0)).unwrap() < reflect_prob {
-            scattered.origin = record.p;
+            scattered.origin = record.position;
             scattered.direction = reflected;
         } else {
-            scattered.origin = record.p;
+            scattered.origin = record.position;
             scattered.direction = refracted;
         }
         true

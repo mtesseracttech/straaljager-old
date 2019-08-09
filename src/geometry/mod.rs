@@ -12,8 +12,8 @@ use straal::{FloatType, Vec3};
 #[derive(Clone)]
 pub struct HitRecord<T> {
     pub t: T,
-    pub p: Vec3<T>,
-    pub n: Vec3<T>,
+    pub position: Vec3<T>,
+    pub normal: Vec3<T>,
     pub material: Weak<dyn Material<T>>,
 }
 
@@ -24,8 +24,8 @@ where
     pub fn default() -> HitRecord<T> {
         HitRecord {
             t: T::from(0).unwrap(),
-            p: Vec3::zero(),
-            n: Vec3::zero(),
+            position: Vec3::zero(),
+            normal: Vec3::zero(),
             material: Weak::<DummyMaterial>::new(),
         }
     }

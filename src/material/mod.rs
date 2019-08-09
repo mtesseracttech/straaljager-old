@@ -40,17 +40,3 @@ where
         return false;
     }
 }
-
-pub fn refract<S>(i: Vec3<S>, n: Vec3<S>, ni_over_nt: S) -> Option<Vec3<S>>
-where
-    S: FloatType<S>,
-{
-    let unit_i = i.normalized();
-    let dt = unit_i.dot(n);
-    let discriminant = S::one() - ni_over_nt * ni_over_nt * (S::one() - dt * dt);
-    if discriminant > S::zero() {
-        Some((i - n * dt) * ni_over_nt - n * discriminant.sqrt())
-    } else {
-        None
-    }
-}

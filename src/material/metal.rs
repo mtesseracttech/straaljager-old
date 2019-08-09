@@ -35,12 +35,12 @@ where
         attenuation: &mut Vec3<T>,
         scattered: &mut Ray<T>,
     ) -> bool {
-        let reflected = Vec3::<T>::reflect(r.direction.normalized(), record.n);
-        scattered.origin = record.p;
+        let reflected = Vec3::<T>::reflect(r.direction.normalized(), record.normal);
+        scattered.origin = record.position;
         scattered.direction = reflected + random_in_unit_sphere() * self.roughness;
         attenuation.x = self.albedo.x;
         attenuation.y = self.albedo.y;
         attenuation.z = self.albedo.z;
-        scattered.direction.dot(record.n) > T::zero()
+        scattered.direction.dot(record.normal) > T::zero()
     }
 }

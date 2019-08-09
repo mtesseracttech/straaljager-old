@@ -20,6 +20,13 @@ where
     pub fn point_at_parameter(&self, t: T) -> Vec3<T> {
         return self.origin + (self.direction * t);
     }
+
+    pub fn default() -> Ray<T> {
+        Ray {
+            origin: Vec3::<T>::zero(),
+            direction: Vec3::<T>::zero(),
+        }
+    }
 }
 
 pub type RayN = Ray<f32>;
