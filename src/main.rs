@@ -1,17 +1,19 @@
-pub mod geometry;
-pub mod io;
-pub mod material;
-pub mod math;
+use std::sync::Arc;
+use std::time::Instant;
+
+use rand::Rng;
+use rayon::prelude::*;
+use straal::*;
 
 use crate::geometry::*;
 use crate::io::*;
 use crate::material::*;
 use crate::math::*;
-use rand::Rng;
-use rayon::prelude::*;
-use std::sync::Arc;
-use std::time::Instant;
-use straal::*;
+
+pub mod geometry;
+pub mod io;
+pub mod material;
+pub mod math;
 
 type Precision = f64;
 
@@ -19,20 +21,25 @@ fn main() {
     //Timer
     let start_time = Instant::now();
 
-    //Setting up the scene and camera
-    let offset = Vec3::<Precision>::all(100); //This mostly exists to see if certain issues are caused by being near 0,0,0
-    let camera = Camera::<Precision>::new(
-        4.0,
-        2.0,
-        1.0,
-        Vec3::<Precision>::new(0.0, 0.0, 0.0) + offset,
-    );
-    let scene = Arc::new(set_up_scene(offset));
+    let scene = Arc::new(set_up_scene());
 
     //Setting up the output image settings
-    let samples = 1;
-    let image_width = 40;
-    let image_height = (image_width as Precision * camera.aspect_ratio) as usize;
+    let samples = 100;
+    let image_width = 600;
+    let image_height = 300;
+
+    let camera_pos = Vec3::new(3, 3, 2);
+    let camera_target = Vec3::new(0, 0, -1);
+    let focus_distance = Vec3::distance(camera_pos, camera_target);
+    let aperture = 2.0;
+
+    let camera = Camera::<Precision>::new(camera_pos,
+                                          camera_target,
+                                          Vec3::new(0, 1, 0),
+                                          20.0,
+                                          image_width as Precision / image_height as Precision,
+                                          aperture,
+                                          focus_distance);
 
     let row_coords: Vec<usize> = (0..image_height).rev().collect();
 
@@ -75,25 +82,25 @@ fn main() {
     write_ppm_file(&pixels, image_width, image_height, None);
 }
 
-fn set_up_scene(offset: Vec3<Precision>) -> HittableScene<Precision> {
+fn set_up_scene() -> HittableScene<Precision> {
     let mut scene = HittableScene::<Precision>::new();
 
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(0.0, -100.5, -1.0) + offset,
-        radius: 100.0,
+        center: Vec3::<Precision>::new(0.0, -1000.5, -1.0),
+        radius: 1000.0,
         material: Arc::new(LambertianMaterial {
-            albedo: Vec3::<Precision>::new(0.8, 0.8, 0.0),
+            albedo: Vec3::<Precision>::new(0.5, 0.5, 0.5),
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(0.0, 0.0, -1.0) + offset,
+        center: Vec3::<Precision>::new(0.0, 0.0, -1.0),
         radius: 0.5,
         material: Arc::new(LambertianMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.3, 0.3),
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(1.0, 0.0, -1.0) + offset,
+        center: Vec3::<Precision>::new(1.0, 0.0, -1.0),
         radius: 0.5,
         material: Arc::new(MetalMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.6, 0.2),
@@ -101,7 +108,7 @@ fn set_up_scene(offset: Vec3<Precision>) -> HittableScene<Precision> {
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(-1.0, 0.0, -1.0) + offset,
+        center: Vec3::<Precision>::new(-1.0, 0.0, -1.0),
         radius: 0.5,
         material: Arc::new(DielectricMaterial {
             refractive_index: 2.4,
@@ -122,12 +129,12 @@ pub fn get_ray_color(
         let mut attenuation = Vec3::<Precision>::zero();
         if depth < 50
             && rec
-                .material
-                .upgrade()
-                .expect("Could not get RC to material from weak ptr")
-                .scatter(r, &mut rec, &mut attenuation, &mut scattered)
+            .material
+            .upgrade()
+            .expect("Could not get RC to material from weak ptr")
+            .scatter(r, &mut rec, &mut attenuation, &mut scattered)
         {
-            attenuation * get_ray_color(&scattered, scene, depth + 1)
+            attenuation * get_ray_color(&scattered, &scene, depth + 1)
         } else {
             Vec3::<Precision>::zero()
         }

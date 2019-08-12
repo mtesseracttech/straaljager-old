@@ -1,7 +1,8 @@
+use straal::{FloatType, Vec3};
+
 use crate::geometry::HitRecord;
 use crate::material::Material;
 use crate::math::{random_in_unit_sphere, Ray};
-use straal::{FloatType, Vec3};
 
 pub struct MetalMaterial<T> {
     pub albedo: Vec3<T>,
@@ -9,8 +10,8 @@ pub struct MetalMaterial<T> {
 }
 
 impl<T> MetalMaterial<T>
-where
-    T: FloatType<T>,
+    where
+        T: FloatType<T>,
 {
     pub fn create(albedo: &Vec3<T>, roughness: T) -> MetalMaterial<T> {
         MetalMaterial {
@@ -25,8 +26,8 @@ where
 }
 
 impl<T> Material<T> for MetalMaterial<T>
-where
-    T: FloatType<T> + Send + Sync,
+    where
+        T: FloatType<T> + Send + Sync,
 {
     fn scatter(
         &self,
