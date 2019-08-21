@@ -28,15 +28,15 @@ fn main() {
     let image_width = 600;
     let image_height = 300;
 
-    let camera_pos = Vec3::new(3, 3, 2);
-    let camera_target = Vec3::new(0, 0, -1);
+    let camera_pos = Vec3::new(4, 2, 1);
+    let camera_target = Vec3::new(-0.0, 1.0, 0.0);
     let focus_distance = Vec3::distance(camera_pos, camera_target);
-    let aperture = 2.0;
+    let aperture = 0.1;
 
     let camera = Camera::<Precision>::new(camera_pos,
                                           camera_target,
                                           Vec3::new(0, 1, 0),
-                                          20.0,
+                                          40.0,
                                           image_width as Precision / image_height as Precision,
                                           aperture,
                                           focus_distance);
@@ -86,35 +86,79 @@ fn set_up_scene() -> HittableScene<Precision> {
     let mut scene = HittableScene::<Precision>::new();
 
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(0.0, -1000.5, -1.0),
+        center: Vec3::<Precision>::new(0.0, -1000.0, -0.0),
         radius: 1000.0,
         material: Arc::new(LambertianMaterial {
             albedo: Vec3::<Precision>::new(0.5, 0.5, 0.5),
         }),
     }));
+
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(0.0, 0.0, -1.0),
-        radius: 0.5,
+        center: Vec3::<Precision>::new(-0.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Arc::new(DielectricMaterial {
+            refractive_index: 1.5,
+        }),
+    }));
+    scene.add_hittable(Arc::new(Sphere {
+        center: Vec3::<Precision>::new(-4.0, 1.0, 0.0),
+        radius: 1.0,
         material: Arc::new(LambertianMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.3, 0.3),
         }),
     }));
     scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(1.0, 0.0, -1.0),
-        radius: 0.5,
+        center: Vec3::<Precision>::new(4.0, 1.0, 0.0),
+        radius: 1.0,
         material: Arc::new(MetalMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.6, 0.2),
-            roughness: 0.5,
-        }),
-    }));
-    scene.add_hittable(Arc::new(Sphere {
-        center: Vec3::<Precision>::new(-1.0, 0.0, -1.0),
-        radius: 0.5,
-        material: Arc::new(DielectricMaterial {
-            refractive_index: 2.4,
+            roughness: 0.0,
         }),
     }));
 
+    /*let mut rng = rand::thread_rng();
+    for a in -11..11 {
+        for b in -11..11 {
+            let r = 0.2;
+            //let radius = rng.gen_range(0.0, 0.9)
+            let mat_choice = rng.gen_range(0.0, 1.0);
+            let c = Vec3::new(a as f64 + rng.gen_range(0.0, 1.0 - r / 2.0),
+                              r,
+                              b as f64 + rng.gen_range(0.0, 1.0 - r / 2.0));
+            if mat_choice < 0.8 {
+                scene.add_hittable(Arc::new(Sphere {
+                    center: c,
+                    radius: r,
+                    material: Arc::new(LambertianMaterial {
+                        albedo: Vec3::<Precision>::new(rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
+                                                       rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
+                                                       rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0)),
+                    }),
+                }));
+            } else if mat_choice < 0.95 {
+                scene.add_hittable(Arc::new(Sphere {
+                    center: c,
+                    radius: r,
+                    material: Arc::new(MetalMaterial {
+                        albedo: Vec3::<Precision>::new(rng.gen_range(0.5, 1.0),
+                                                       rng.gen_range(0.5, 1.0),
+                                                       rng.gen_range(0.5, 1.0)),
+                        roughness: (rng.gen_range(0.0, 0.5)),
+                    }),
+                }));
+            } else {
+                scene.add_hittable(Arc::new(Sphere {
+                    center: c,
+                    radius: r,
+                    material: Arc::new(DielectricMaterial {
+                        refractive_index: 1.5,
+                    }),
+                }));
+            }
+        }
+    }*/
+
+    println!("Scene set up.");
     scene
 }
 

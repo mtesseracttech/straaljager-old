@@ -9,9 +9,9 @@ pub struct Camera<T> {
     pub vertical: Vec3<T>,
     pub aspect_ratio: T,
     pub lens_radius: T,
-    pub forward: Vec3<T>,
-    pub up: Vec3<T>,
-    pub right: Vec3<T>,
+    pub w: Vec3<T>,
+    pub v: Vec3<T>,
+    pub u: Vec3<T>,
 }
 
 impl<T> Camera<T>
@@ -33,21 +33,21 @@ impl<T> Camera<T>
             vertical: v * T::from(2).unwrap() * half_height * focus_distance,
             aspect_ratio,
             lens_radius: aperture / T::from(2).unwrap(),
-            forward: w,
-            up: v,
-            right: u,
+            w,
+            v,
+            u,
         }
     }
 
-    pub fn get_ray(&self, x: T, y: T) -> Ray<T>
+    pub fn get_ray(&self, s: T, t: T) -> Ray<T>
         where
             T: FloatType<T>,
     {
         let random_dist = random_in_unit_disk() * self.lens_radius.clone();
-        let offset = self.right * random_dist.x + self.up * random_dist.y;
+        let offset = self.u * random_dist.x + self.v * random_dist.y;
         Ray {
             origin: self.origin + offset,
-            direction: self.lower_left_corner + self.horizontal * x + self.vertical * y - self.origin,
+            direction: self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
         }
     }
 }

@@ -1,16 +1,17 @@
+use rand::{Rng, thread_rng};
+use straal::{FloatType, Vec3};
+
 use crate::geometry::HitRecord;
 use crate::material::Material;
-use crate::math::{schlick, Ray};
-use rand::{thread_rng, Rng};
-use straal::{FloatType, Vec3};
+use crate::math::{Ray, refract, schlick};
 
 pub struct DielectricMaterial<T> {
     pub refractive_index: T,
 }
 
 impl<T> DielectricMaterial<T>
-where
-    T: FloatType<T>,
+    where
+        T: FloatType<T>,
 {
     pub fn create(refractive_index: T) -> DielectricMaterial<T> {
         DielectricMaterial { refractive_index }
@@ -18,8 +19,8 @@ where
 }
 
 impl<T> Material<T> for DielectricMaterial<T>
-where
-    T: FloatType<T> + Send + Sync,
+    where
+        T: FloatType<T> + Send + Sync,
 {
     fn scatter(
         &self,
@@ -52,7 +53,7 @@ where
 
         let refracted;
         let reflect_prob;
-        match Vec3::<T>::refract(r.direction, outward_normal, ni_over_nt) {
+        match refract(r.direction, outward_normal, ni_over_nt) {
             Some(r) => {
                 refracted = r;
                 reflect_prob = schlick(cosine, self.refractive_index);
