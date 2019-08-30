@@ -15,7 +15,7 @@ pub mod io;
 pub mod material;
 pub mod math;
 
-type Precision = f64;
+type Precision = f32;
 
 fn main() {
     //Timer
@@ -116,15 +116,15 @@ fn set_up_scene() -> HittableScene<Precision> {
         }),
     }));
 
-    /*let mut rng = rand::thread_rng();
+    let mut rng = rand::thread_rng();
     for a in -11..11 {
         for b in -11..11 {
             let r = 0.2;
             //let radius = rng.gen_range(0.0, 0.9)
             let mat_choice = rng.gen_range(0.0, 1.0);
-            let c = Vec3::new(a as f64 + rng.gen_range(0.0, 1.0 - r / 2.0),
+            let c = Vec3::new(a as Precision + rng.gen_range(0.0, 1.0 - r / 2.0),
                               r,
-                              b as f64 + rng.gen_range(0.0, 1.0 - r / 2.0));
+                              b as Precision + rng.gen_range(0.0, 1.0 - r / 2.0));
             if mat_choice < 0.8 {
                 scene.add_hittable(Arc::new(Sphere {
                     center: c,
@@ -156,7 +156,7 @@ fn set_up_scene() -> HittableScene<Precision> {
                 }));
             }
         }
-    }*/
+    }
 
     println!("Scene set up.");
     scene
@@ -168,7 +168,7 @@ pub fn get_ray_color(
     depth: u32,
 ) -> Vec3<Precision> {
     let mut rec = HitRecord::<Precision>::default();
-    if scene.hit(r, 0.0, 10000000.0, &mut rec) {
+    if scene.hit(r, 0.01, 10000000.0, &mut rec) {
         let mut scattered = Ray::<Precision>::default();
         let mut attenuation = Vec3::<Precision>::zero();
         if depth < 50
