@@ -3,7 +3,7 @@ use straal::{FloatType, Vec3};
 
 use crate::geometry::HitRecord;
 use crate::material::Material;
-use crate::math::{Ray, refract, schlick};
+use crate::math::{Ray, schlick};
 
 pub struct DielectricMaterial<T> {
     pub refractive_index: T,
@@ -74,5 +74,16 @@ impl<T> Material<T> for DielectricMaterial<T>
             scattered.direction = refracted;
         }
         true
+    }
+}
+
+pub fn refract<T>(v: Vec3<T>, n: Vec3<T>, ni_over_nt: T) -> Option<Vec3<T>> where T: FloatType<T> {
+    let uv = v.normalized();
+    let dt = Vec3::dot(uv, n);
+    let discriminant = T::one() - ni_over_nt * ni_over_nt * (T::one() - dt * dt);
+    if discriminant > T::zero() {
+        Some((uv - (n * dt)) * ni_over_nt - n * discriminant.sqrt())
+    } else {
+        None
     }
 }

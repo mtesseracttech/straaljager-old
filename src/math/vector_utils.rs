@@ -40,12 +40,12 @@ pub fn random_in_unit_disk<T>() -> Vec3<T> where T: FloatType<T> {
     p
 }
 
-pub fn refract<T>(v: Vec3<T>, n: Vec3<T>, ni_over_nt: T) -> Option<Vec3<T>> where T: FloatType<T> {
-    let n_dot_i = Vec3::dot(n, v);
-    let k = T::one() - ni_over_nt * ni_over_nt * (T::one() - n_dot_i * n_dot_i);
-    if k < T::zero() {
-        None
-    } else {
-        Some(v * ni_over_nt - n * (ni_over_nt * n_dot_i + k.sqrt()))
-    }
-}
+//pub fn refract<T>(v: Vec3<T>, n: Vec3<T>, ni_over_nt: T) -> Option<Vec3<T>> where T: FloatType<T> {
+//    let n_dot_i = Vec3::dot(n, v);
+//    let k = T::one() - ni_over_nt * ni_over_nt * (T::one() - n_dot_i * n_dot_i);
+//    if k < T::zero() {
+//        None
+//    } else {
+//        Some(v * ni_over_nt - n * (ni_over_nt * n_dot_i + k.sqrt()))
+//    }
+//}
