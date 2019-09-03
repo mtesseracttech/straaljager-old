@@ -25,13 +25,13 @@ fn main() {
 
     //Setting up the output image settings
     let samples = 100;
-    let image_width = 600;
-    let image_height = 300;
+    let image_width = 1200;
+    let image_height = 800;
 
-    let camera_pos = Vec3::new(4, 2, 1);
-    let camera_target = Vec3::new(-0.0, 1.0, 0.0);
+    let camera_pos = Vec3::new(8, 2, 3);
+    let camera_target = Vec3::new(0.0, 0.0, 0.0);
     let focus_distance = Vec3::distance(camera_pos, camera_target);
-    let aperture = 0.1;
+    let aperture = 0.2;
 
     let camera = Camera::<Precision>::new(camera_pos,
                                           camera_target,
@@ -39,7 +39,7 @@ fn main() {
                                           40.0,
                                           image_width as Precision / image_height as Precision,
                                           aperture,
-                                          focus_distance);
+                                          focus_distance, 0.0, 1.0);
 
     let row_coords: Vec<usize> = (0..image_height).rev().collect();
 
@@ -112,7 +112,7 @@ fn set_up_scene() -> HittableScene<Precision> {
         radius: 1.0,
         material: Arc::new(MetalMaterial {
             albedo: Vec3::<Precision>::new(0.8, 0.6, 0.2),
-            roughness: 0.0,
+            roughness: 0.8,
         }),
     }));
 
@@ -120,14 +120,16 @@ fn set_up_scene() -> HittableScene<Precision> {
     for a in -11..11 {
         for b in -11..11 {
             let r = 0.2;
-            //let radius = rng.gen_range(0.0, 0.9)
             let mat_choice = rng.gen_range(0.0, 1.0);
             let c = Vec3::new(a as Precision + rng.gen_range(0.0, 1.0 - r / 2.0),
                               r,
-                              b as Precision + rng.gen_range(0.0, 1.0 - r / 2.0));
+                              b as Precision + rng.gen_range(0.0, 1.0 - r / 2.0)) * Vec3::new(1.0, 1.0, 1.0);
             if mat_choice < 0.8 {
-                scene.add_hittable(Arc::new(Sphere {
-                    center: c,
+                scene.add_hittable(Arc::new(MovableSphere {
+                    center0: c,
+                    center1: c + Vec3::new(0.0, rng.gen_range(0.0, 0.5), 0.0),
+                    time0: 0.0,
+                    time1: 1.0,
                     radius: r,
                     material: Arc::new(LambertianMaterial {
                         albedo: Vec3::<Precision>::new(rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),

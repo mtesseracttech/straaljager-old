@@ -1,13 +1,18 @@
+use std::sync::Weak;
+
+use straal::{FloatType, Vec3};
+
+pub use hittable::*;
+pub use movable_sphere::*;
+pub use scene::*;
+pub use sphere::*;
+
+use crate::material::{DummyMaterial, Material};
+
 pub mod hittable;
 pub mod scene;
 pub mod sphere;
-
-use crate::material::{DummyMaterial, Material};
-pub use hittable::*;
-pub use scene::*;
-pub use sphere::*;
-use std::sync::Weak;
-use straal::{FloatType, Vec3};
+pub mod movable_sphere;
 
 #[derive(Clone)]
 pub struct HitRecord<T> {
@@ -18,8 +23,8 @@ pub struct HitRecord<T> {
 }
 
 impl<T> HitRecord<T>
-where
-    T: FloatType<T> + Send + Sync,
+    where
+        T: FloatType<T> + Send + Sync,
 {
     pub fn default() -> HitRecord<T> {
         HitRecord {

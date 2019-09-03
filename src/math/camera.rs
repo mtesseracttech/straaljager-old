@@ -1,3 +1,4 @@
+use rand::Rng;
 use straal::{FloatType, Vec3};
 
 use crate::math::{random_in_unit_disk, Ray};
@@ -12,13 +13,15 @@ pub struct Camera<T> {
     pub w: Vec3<T>,
     pub v: Vec3<T>,
     pub u: Vec3<T>,
+    pub time0: T,
+    pub time1: T,
 }
 
 impl<T> Camera<T>
     where
         T: FloatType<T>,
 {
-    pub fn new(look_from: Vec3<T>, look_at: Vec3<T>, v_up: Vec3<T>, vertical_fov: T, aspect_ratio: T, aperture: T, focus_distance: T) -> Camera<T> {
+    pub fn new(look_from: Vec3<T>, look_at: Vec3<T>, v_up: Vec3<T>, vertical_fov: T, aspect_ratio: T, aperture: T, focus_distance: T, time0: T, time1: T) -> Camera<T> {
         let theta = vertical_fov.to_radians();
         let half_height = (theta / T::from(2).unwrap()).tan();
         let half_width = aspect_ratio * half_height;
@@ -36,6 +39,8 @@ impl<T> Camera<T>
             w,
             v,
             u,
+            time0,
+            time1,
         }
     }
 
@@ -43,11 +48,14 @@ impl<T> Camera<T>
         where
             T: FloatType<T>,
     {
+        let mut rng = rand::thread_rng();
         let random_dist = random_in_unit_disk() * self.lens_radius.clone();
         let offset = self.u * random_dist.x + self.v * random_dist.y;
+        let time = self.time0 + T::from(rng.gen_range(0.0, 1.0)).unwrap() * (self.time1 - self.time0);
         Ray {
             origin: self.origin + offset,
             direction: self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
+            time,
         }
     }
 }
