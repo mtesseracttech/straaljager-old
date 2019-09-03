@@ -41,6 +41,7 @@ impl fmt::Display for CompoundTime {
 }
 
 pub fn duration_to_string(duration: &Duration) -> String {
+    let milliseconds = ((duration.subsec_nanos() as f64 / 1.0e+9) * 1000.0) as usize;
     let mut compound = CompoundTime::new(0, 0, 0, 0, duration.as_secs() as usize);
     compound.balance();
     format!(
