@@ -49,6 +49,6 @@ pub fn duration_to_string(duration: &Duration) -> String {
         compound.w * 7 * 24 + compound.d * 24 + compound.h,
         compound.m,
         compound.s,
-        ((duration.subsec_nanos() as f64 / 1.0e+9) * 1000.0) as usize
+        milliseconds
     )
 }

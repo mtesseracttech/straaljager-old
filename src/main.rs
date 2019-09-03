@@ -6,6 +6,7 @@ use rayon::prelude::*;
 use straal::*;
 
 use crate::geometry::*;
+use crate::geometry::Hittable;
 use crate::io::*;
 use crate::material::*;
 use crate::math::*;
@@ -21,10 +22,11 @@ fn main() {
     //Timer
     let start_time = Instant::now();
 
-    let scene = Arc::new(set_up_scene());
+    let mut scene = set_up_scene();
+    let bvh = BvhNode::<Precision>::new(&mut scene.hittable_list[..], 0.0, 1.0);
 
     //Setting up the output image settings
-    let samples = 10;
+    let samples = 100;
     let image_width = 1200;
     let image_height = 800;
 
@@ -36,7 +38,7 @@ fn main() {
     let camera = Camera::<Precision>::new(
         camera_pos,
         camera_target,
-        Vec3::new(0, 1, 0),
+        Vec3::up(),
         40.0,
         image_width as Precision / image_height as Precision,
         aperture,
@@ -44,10 +46,10 @@ fn main() {
         0.0,
         1.0,
     );
-
     let row_coords: Vec<usize> = (0..image_height).rev().collect();
 
     let mut rows: Vec<Vec<Vec3<Precision>>> = Vec::with_capacity(image_height);
+
     row_coords
         .par_iter()
         .map(|j| {
@@ -60,13 +62,14 @@ fn main() {
                                 / image_width as Precision;
                             let v = (*j as Precision + rng.gen_range(0.0, 1.0))
                                 / image_height as Precision;
-                            get_ray_color(&camera.get_ray(u, v), &scene, 0)
+                            get_ray_color(&camera.get_ray(u, v), &bvh, 0)
                         })
                         .sum();
                     let res = average / samples as Precision;
                     gamma_color(&res)
                 })
                 .collect();
+            println!("Row {} done", j);
             row
         })
         .collect_into_vec(&mut rows);
@@ -173,7 +176,7 @@ fn set_up_scene() -> HittableScene<Precision> {
 
 pub fn get_ray_color(
     r: &Ray<Precision>,
-    scene: &HittableScene<Precision>,
+    scene: &BvhNode<Precision>,
     depth: u32,
 ) -> Vec3<Precision> {
     let mut rec = HitRecord::<Precision>::default();
@@ -182,10 +185,10 @@ pub fn get_ray_color(
         let mut attenuation = Vec3::<Precision>::zero();
         if depth < 50
             && rec
-                .material
-                .upgrade()
-                .expect("Could not get RC to material from weak ptr")
-                .scatter(r, &mut rec, &mut attenuation, &mut scattered)
+            .material
+            .upgrade()
+            .expect("Could not get RC to material from weak ptr")
+            .scatter(r, &mut rec, &mut attenuation, &mut scattered)
         {
             attenuation * get_ray_color(&scattered, &scene, depth + 1)
         } else {

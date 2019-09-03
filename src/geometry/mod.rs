@@ -2,6 +2,8 @@ use std::sync::Weak;
 
 use straal::{FloatType, Vec3};
 
+pub use aabb::*;
+pub use bvh_node::*;
 pub use hittable::*;
 pub use movable_sphere::*;
 pub use scene::*;
@@ -13,6 +15,8 @@ pub mod hittable;
 pub mod scene;
 pub mod sphere;
 pub mod movable_sphere;
+pub mod aabb;
+pub mod bvh_node;
 
 #[derive(Clone)]
 pub struct HitRecord<T> {
@@ -33,5 +37,12 @@ impl<T> HitRecord<T>
             normal: Vec3::zero(),
             material: Weak::<DummyMaterial>::new(),
         }
+    }
+
+    pub fn update(&mut self, other: HitRecord<T>) {
+        self.material = other.material;
+        self.position = other.position;
+        self.normal = other.normal;
+        self.t = other.t;
     }
 }

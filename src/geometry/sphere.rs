@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use straal::{FloatType, Vec3};
 
-use crate::geometry::{HitRecord, Hittable};
+use crate::geometry::{AABB, HitRecord, Hittable};
 use crate::material::Material;
 use crate::math::Ray;
 
@@ -56,5 +56,13 @@ impl<T> Hittable<T> for Sphere<T>
             }
         }
         return false;
+    }
+
+    fn bounding_box(&self, _t0: T, _t1: T) -> Option<AABB<T>> {
+        let rad_vec = Vec3::all(self.radius);
+        Some(AABB {
+            min: self.get_center() - rad_vec,
+            max: self.get_center() + rad_vec,
+        })
     }
 }

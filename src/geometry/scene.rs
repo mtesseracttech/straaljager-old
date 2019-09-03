@@ -1,15 +1,17 @@
-use crate::geometry::{HitRecord, Hittable};
-use crate::math::Ray;
 use std::sync::Arc;
+
 use straal::FloatType;
 
+use crate::geometry::{AABB, HitRecord, Hittable};
+use crate::math::Ray;
+
 pub struct HittableScene<T> {
-    pub hittable_list: Vec<Arc<dyn Hittable<T>>>,
+    pub hittable_list: Vec<Arc<dyn Hittable<T> + Send + Sync>>,
 }
 
 impl<T> HittableScene<T>
-where
-    T: FloatType<T>,
+    where
+        T: FloatType<T>,
 {
     pub fn new() -> HittableScene<T> {
         return HittableScene {
@@ -23,8 +25,8 @@ where
 }
 
 impl<T> Hittable<T> for HittableScene<T>
-where
-    T: FloatType<T> + Send + Sync,
+    where
+        T: FloatType<T> + Send + Sync,
 {
     fn hit(&self, r: &Ray<T>, t_min: T, t_max: T, record: &mut HitRecord<T>) -> bool {
         let mut temp_rec = HitRecord::<T>::default();
@@ -41,5 +43,9 @@ where
             }
         }
         hit_anything
+    }
+
+    fn bounding_box(&self, _t0: T, _t1: T) -> Option<AABB<T>> {
+        None
     }
 }

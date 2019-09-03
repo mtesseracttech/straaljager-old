@@ -6,6 +6,11 @@
       <sourceFolder url="file://$MODULE_DIR$/../straaljager\examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../straaljager\tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../straaljager\benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/geometry/bvh_node/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/geometry/bvh_node\examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/geometry/bvh_node\tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/geometry/bvh_node\benches" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/src/geometry/bvh_node\target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
