@@ -24,7 +24,7 @@ fn main() {
     let scene = Arc::new(set_up_scene());
 
     //Setting up the output image settings
-    let samples = 100;
+    let samples = 10;
     let image_width = 1200;
     let image_height = 800;
 
@@ -33,13 +33,17 @@ fn main() {
     let focus_distance = Vec3::distance(camera_pos, camera_target);
     let aperture = 0.2;
 
-    let camera = Camera::<Precision>::new(camera_pos,
-                                          camera_target,
-                                          Vec3::new(0, 1, 0),
-                                          40.0,
-                                          image_width as Precision / image_height as Precision,
-                                          aperture,
-                                          focus_distance, 0.0, 1.0);
+    let camera = Camera::<Precision>::new(
+        camera_pos,
+        camera_target,
+        Vec3::new(0, 1, 0),
+        40.0,
+        image_width as Precision / image_height as Precision,
+        aperture,
+        focus_distance,
+        0.0,
+        1.0,
+    );
 
     let row_coords: Vec<usize> = (0..image_height).rev().collect();
 
@@ -74,11 +78,8 @@ fn main() {
         pixels.append(&mut row);
     }
 
-    let end_time = start_time.elapsed();
-    println!(
-        "Time taken for ray tracing: {:.4}s",
-        end_time.as_secs() as f64 + end_time.subsec_nanos() as f64 / 1.0e+9,
-    );
+    println!("{}", duration_to_string(&start_time.elapsed()));
+
     write_ppm_file(&pixels, image_width, image_height, None);
 }
 
@@ -121,9 +122,11 @@ fn set_up_scene() -> HittableScene<Precision> {
         for b in -11..11 {
             let r = 0.2;
             let mat_choice = rng.gen_range(0.0, 1.0);
-            let c = Vec3::new(a as Precision + rng.gen_range(0.0, 1.0 - r / 2.0),
-                              r,
-                              b as Precision + rng.gen_range(0.0, 1.0 - r / 2.0)) * Vec3::new(1.0, 1.0, 1.0);
+            let c = Vec3::new(
+                a as Precision + rng.gen_range(0.0, 1.0 - r / 2.0),
+                r,
+                b as Precision + rng.gen_range(0.0, 1.0 - r / 2.0),
+            ) * Vec3::new(1.0, 1.0, 1.0);
             if mat_choice < 0.8 {
                 scene.add_hittable(Arc::new(MovableSphere {
                     center0: c,
@@ -132,9 +135,11 @@ fn set_up_scene() -> HittableScene<Precision> {
                     time1: 1.0,
                     radius: r,
                     material: Arc::new(LambertianMaterial {
-                        albedo: Vec3::<Precision>::new(rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
-                                                       rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
-                                                       rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0)),
+                        albedo: Vec3::<Precision>::new(
+                            rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
+                            rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
+                            rng.gen_range(0.0, 1.0) * rng.gen_range(0.0, 1.0),
+                        ),
                     }),
                 }));
             } else if mat_choice < 0.95 {
@@ -142,9 +147,11 @@ fn set_up_scene() -> HittableScene<Precision> {
                     center: c,
                     radius: r,
                     material: Arc::new(MetalMaterial {
-                        albedo: Vec3::<Precision>::new(rng.gen_range(0.5, 1.0),
-                                                       rng.gen_range(0.5, 1.0),
-                                                       rng.gen_range(0.5, 1.0)),
+                        albedo: Vec3::<Precision>::new(
+                            rng.gen_range(0.5, 1.0),
+                            rng.gen_range(0.5, 1.0),
+                            rng.gen_range(0.5, 1.0),
+                        ),
                         roughness: (rng.gen_range(0.0, 0.5)),
                     }),
                 }));
