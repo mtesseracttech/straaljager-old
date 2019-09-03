@@ -1,7 +1,8 @@
-use rand::{self, Rng};
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
+
+use rand::{self, Rng};
 use straal::{FloatType, IVec3, Vec3};
 
 pub fn to_ppm_color<T>(v: &Vec3<T>) -> IVec3<i32>
@@ -13,7 +14,11 @@ where
     let y = num::cast(max * v.y);
     let z = num::cast(max * v.z);
     if x.is_none() || y.is_none() || z.is_none() {
-        println!("Something is wrong here: {},{},{}", v.x, v.y, v.z);
+        return IVec3 {
+            x: if x.is_none() { 0 } else { x.unwrap() },
+            y: if y.is_none() { 0 } else { y.unwrap() },
+            z: if z.is_none() { 0 } else { z.unwrap() },
+        };
     }
     IVec3 {
         x: x.unwrap(),

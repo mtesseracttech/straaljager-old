@@ -175,10 +175,10 @@ pub fn get_ray_color(
         let mut attenuation = Vec3::<Precision>::zero();
         if depth < 50
             && rec
-            .material
-            .upgrade()
-            .expect("Could not get RC to material from weak ptr")
-            .scatter(r, &mut rec, &mut attenuation, &mut scattered)
+                .material
+                .upgrade()
+                .expect("Could not get RC to material from weak ptr")
+                .scatter(r, &mut rec, &mut attenuation, &mut scattered)
         {
             attenuation * get_ray_color(&scattered, &scene, depth + 1)
         } else {
