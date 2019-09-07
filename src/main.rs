@@ -15,6 +15,7 @@ pub mod geometry;
 pub mod io;
 pub mod material;
 pub mod math;
+pub mod textures;
 
 type Precision = f32;
 
@@ -26,7 +27,7 @@ fn main() {
     let bvh = BvhNode::<Precision>::new(&mut scene.hittable_list[..], 0.0, 1.0);
 
     //Setting up the output image settings
-    let samples = 100;
+    let samples = 10;
     let image_width = 1200;
     let image_height = 800;
 
@@ -58,9 +59,9 @@ fn main() {
                 .map(|i| {
                     let average: Vec3<Precision> = (0..samples)
                         .map(|_s| {
-                            let u = (i as Precision + rng.gen_range(0.0, 1.0))
+                            let u = (i as Precision + rng.gen_range(-0.5, 0.5))
                                 / image_width as Precision;
-                            let v = (*j as Precision + rng.gen_range(0.0, 1.0))
+                            let v = (*j as Precision + rng.gen_range(-0.5, 0.5))
                                 / image_height as Precision;
                             get_ray_color(&camera.get_ray(u, v), &bvh, 0)
                         })
