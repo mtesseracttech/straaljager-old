@@ -27,9 +27,9 @@ fn main() {
     let bvh = BvhNode::<Precision>::new(&mut scene.hittable_list[..], 0.0, 1.0);
 
     //Setting up the output image settings
-    let samples = 10;
-    let image_width = 1200;
-    let image_height = 800;
+    let samples = 50;
+    let image_width = 600;
+    let image_height = 480;
 
     let camera_pos = Vec3::new(8, 2, 3);
     let camera_target = Vec3::new(0.0, 0.0, 0.0);
@@ -184,13 +184,7 @@ pub fn get_ray_color(
     if scene.hit(r, 0.01, 10000000.0, &mut rec) {
         let mut scattered = Ray::<Precision>::default();
         let mut attenuation = Vec3::<Precision>::zero();
-        if depth < 50
-            && rec
-            .material
-            .upgrade()
-            .expect("Could not get RC to material from weak ptr")
-            .scatter(r, &mut rec, &mut attenuation, &mut scattered)
-        {
+        if depth < 50 && rec.material.upgrade().expect("Could not get RC to material from weak ptr").scatter(r, &mut rec, &mut attenuation, &mut scattered) {
             attenuation * get_ray_color(&scattered, &scene, depth + 1)
         } else {
             Vec3::<Precision>::zero()

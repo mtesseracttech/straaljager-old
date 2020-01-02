@@ -3,7 +3,7 @@ use straal::{FloatType, Vec3};
 use crate::textures::Texture;
 
 pub struct ConstantTexture<T> {
-    pub color: T
+    pub color: Vec3<T>
 }
 
 impl<T> ConstantTexture<T> where T: FloatType<T> {
@@ -20,7 +20,7 @@ impl<T> ConstantTexture<T> where T: FloatType<T> {
     }
 }
 
-impl<T> Texture for ConstantTexture<T> where T: FloatType<T> {
+impl<T> Texture<T> for ConstantTexture<T> where T: FloatType<T> + Send + Sync {
     fn sample_color(&self, u: T, v: T, p: &Vec3<T>) -> Vec3<T> {
         self.color
     }
